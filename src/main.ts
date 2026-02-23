@@ -159,6 +159,6 @@ async function bootstrap() {
   console.log('  PATCH /api/users/me - Update user profile (protected)');
   console.log('  DELETE /api/users/me - Delete user account (protected)');
 
-  await app.listen(port);
+  await app.listen(port, '0.0.0.0');
 }
 bootstrap();

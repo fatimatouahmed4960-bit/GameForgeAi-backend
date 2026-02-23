@@ -1,0 +1,37 @@
+# Game_backend_deploy - Backend avec MongoDB Atlas
+# 1. Mettez MONGODB_URI (URL Atlas) et JWT_SECRET dans .env
+# 2. docker compose up -d backend
+
+services:
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "${PORT:-3000}:3000"
+    environment:
+      - NODE_ENV=production
+      - PORT=3000
+      - MONGODB_URI=${MONGODB_URI}
+      - JWT_SECRET=${JWT_SECRET:-change-me-in-production}
+      - JWT_EXPIRES_IN=${JWT_EXPIRES_IN:-24h}
+      - JWT_REMEMBER_ME_EXPIRES_IN=${JWT_REMEMBER_ME_EXPIRES_IN:-30d}
+      - GEMINI_API_KEY=${GEMINI_API_KEY:-}
+      - STRIPE_SECRET_KEY=${STRIPE_SECRET_KEY:-}
+      - STRIPE_PUBLISHABLE_KEY=${STRIPE_PUBLISHABLE_KEY:-}
+      - CLOUDINARY_CLOUD_NAME=${CLOUDINARY_CLOUD_NAME:-}
+      - CLOUDINARY_API_KEY=${CLOUDINARY_API_KEY:-}
+      - CLOUDINARY_API_SECRET=${CLOUDINARY_API_SECRET:-}
+      - FRONTEND_URL=${FRONTEND_URL:-http://localhost}
+    volumes:
+      - uploads_data:/app/uploads
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "node -e \"require('http').get('http://localhost:3000/api', (r) => { r.resume(); process.exit(r.statusCode ? 0 : 1); }).on('error', () => process.exit(1))\""]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+volumes:
+  uploads_data:
